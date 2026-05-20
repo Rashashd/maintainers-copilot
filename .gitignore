@@ -1,0 +1,40 @@
+# Secrets
+.env
+seed.sh
+
+# Python
+.venv/
+__pycache__/
+*.pyc
+*.pyo
+*.egg-info/
+dist/
+build/
+
+# ML artifacts
+# Large raw data — fetched at runtime via fetch.py
+ml/data/raw/
+*.csv
+# .pt / .safetensors / .pkl are tracked via Git LFS (see .gitattributes)
+
+# RAG corpus — fetched at runtime, not committed
+app/services/rag/data/*.parquet
+
+# Logs — write to logs/ locally, never commit
+# logs/ directory is tracked (via logs/.gitkeep) but its contents are not
+*.log
+
+# Node / React widget
+node_modules/
+widget/react/dist/
+widget/react/.vite/
+
+# Docs plan
+docs/plan/
+
+# OS / IDE
+.DS_Store
+*.swp
+.idea/
+*.iml
+.vscode/
