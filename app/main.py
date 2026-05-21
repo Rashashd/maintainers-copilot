@@ -6,10 +6,12 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from app.core.exception_handlers import register as register_exception_handlers
 from app.core.lifespan import lifespan
+from app.routes import admin as admin_route
 from app.routes import auth as auth_route
 from app.routes import chat as chat_route
 from app.routes import memory as memory_route
 from app.routes import rag as rag_route
+from app.routes import widget as widget_route
 
 app = FastAPI(
     title="Maintainer's Co-Pilot",
@@ -42,6 +44,8 @@ app.include_router(auth_route.router)
 app.include_router(chat_route.router)
 app.include_router(memory_route.router)
 app.include_router(rag_route.router)
+app.include_router(widget_route.router)
+app.include_router(admin_route.router)
 
 
 @app.get("/health", tags=["ops"])
