@@ -1,0 +1,66 @@
+name: Classification Eval
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  eval:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      # model-server bakes the finetuned weights into the image at build time
+      # (COPY ml/finetune/output/ ...) so it needs no Vault/MinIO at runtime.
+      - name: Build model-server image
+        run: docker compose build model-server
+        env:
+          VAULT_TOKEN: ci-dummy
+          DB_PASSWORD: ci-dummy
+          MINIO_ROOT_PASSWORD: ci-dummy
+
+      - name: Start model-server (no deps — self-contained)
+        run: docker compose up -d --no-deps model-server
+        env:
+          VAULT_TOKEN: ci-dummy
+          DB_PASSWORD: ci-dummy
+          MINIO_ROOT_PASSWORD: ci-dummy
+
+      - name: Wait for model-server health
+        run: |
+          for i in $(seq 1 30); do
+            if curl -sf http://localhost:8001/health > /dev/null; then
+              echo "model-server healthy"
+              exit 0
+            fi
+            echo "  waiting... ($i/30)"
+            sleep 10
+          done
+          echo "model-server did not become healthy in time"
+          docker compose logs model-server
+          exit 1
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Install eval dependencies
+        run: pip install httpx pyyaml
+
+      - name: Run classification eval
+        run: python -m eval.classification.runner --inference-url http://localhost:8001
+
+      - name: Upload eval report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: classification-eval-report
+          path: eval/classification/eval_report.json
