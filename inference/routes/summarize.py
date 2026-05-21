@@ -17,5 +17,5 @@ class SummarizeResponse(BaseModel):
 
 @router.post("/summarize", response_model=SummarizeResponse)
 async def summarize_text(req: SummarizeRequest) -> SummarizeResponse:
-    summary = summarizer.summarize(req.text, req.max_sentences)
+    summary = await summarizer.summarize(req.text, req.max_sentences)
     return SummarizeResponse(summary=summary)

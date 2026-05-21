@@ -8,7 +8,7 @@ from fastapi import FastAPI
 from inference.routes import classify as classify_route
 from inference.routes import ner as ner_route
 from inference.routes import summarize as summarize_route
-from inference.runners import classifier, ner
+from inference.runners import classifier, ner, summarizer
 
 
 def _configure_logging() -> None:
@@ -39,6 +39,7 @@ async def lifespan(app: FastAPI):
     _configure_logging()
     classifier.init_classifier()
     ner.init_ner()
+    summarizer.init_summarizer()
     yield
 
 
