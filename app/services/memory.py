@@ -12,6 +12,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.db.models import MemoryEntry
 from app.infra import embeddings as embedder
 from app.infra import redis
+from app.repositories import memory as memory_repo
 
 logger = structlog.get_logger()
 
@@ -45,20 +46,20 @@ async def persist_turns(
     texts = [user_message, assistant_reply]
     vectors = await embedder.embed_texts(texts)
 
-    for i, (role, content) in enumerate(
-        [("user", user_message), ("assistant", assistant_reply)]
-    ):
-        embedding = vectors[i] if vectors and i < len(vectors) else None
-        session.add(
-            MemoryEntry(
-                user_id=user_id,
-                conversation_id=conversation_id,
-                role=role,
-                content=content,
-                embedding=embedding,
-            )
+    entries = [
+        MemoryEntry(
+            user_id=user_id,
+            conversation_id=conversation_id,
+            role=role,
+            content=content,
+            embedding=vectors[i] if vectors and i < len(vectors) else None,
         )
+        for i, (role, content) in enumerate(
+            [("user", user_message), ("assistant", assistant_reply)]
+        )
+    ]
 
+    await memory_repo.insert(session, entries)
     await session.commit()
     logger.info(
         "memory_persisted",

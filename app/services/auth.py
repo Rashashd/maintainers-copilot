@@ -11,10 +11,12 @@ from fastapi import Depends, HTTPException, status
 from fastapi_users import BaseUserManager, FastAPIUsers, UUIDIDMixin
 from fastapi_users.authentication import AuthenticationBackend, BearerTransport, JWTStrategy
 from fastapi_users.db import SQLAlchemyUserDatabase
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.db.models import User
-from app.db.user_db import get_user_db
+from app.db.session import get_session
 from app.infra import vault
+from app.repositories import audit as audit_repo
 
 logger = structlog.get_logger()
 
@@ -27,6 +29,22 @@ class UserManager(UUIDIDMixin, BaseUserManager[User, uuid.UUID]):
 
     async def on_after_login(self, user: User, request=None, response=None) -> None:
         logger.info("user_login", user_id=str(user.id), email=user.email)
+
+    async def on_after_update(self, user: User, update_dict: dict, request=None) -> None:
+        if "role" in update_dict:
+            session = self.user_db.session
+            await audit_repo.log(
+                session,
+                actor_id=user.id,
+                action="role_change",
+                target={"type": "user", "id": str(user.id), "new_role": update_dict["role"]},
+            )
+            await session.commit()
+            logger.info("role_changed", user_id=str(user.id), new_role=update_dict["role"])
+
+
+async def get_user_db(session: AsyncSession = Depends(get_session)):
+    yield SQLAlchemyUserDatabase(session, User)
 
 
 async def get_user_manager(

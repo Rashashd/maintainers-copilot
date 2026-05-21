@@ -4,7 +4,7 @@ Wraps /classify, /ner, and /summarize endpoints. All methods are async and raise
 ToolFailure on non-2xx responses so the agent loop can handle them gracefully.
 
 Usage:
-    from app.infra.inference_client import get_inference_client
+    from app.infra.inference import get_inference_client
     client = get_inference_client()
     result = await client.classify(title="...", body="...")
 """
@@ -15,7 +15,7 @@ import httpx
 import structlog
 
 from app.core.config import get_settings
-from app.domain.errors import ToolFailure
+from app.schemas.errors import ToolFailure
 
 logger = structlog.get_logger()
 

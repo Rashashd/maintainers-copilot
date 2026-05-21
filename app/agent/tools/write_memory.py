@@ -1,9 +1,4 @@
-"""write_memory tool — persists episodic memory to pgvector.
-
-The full memory service (Redis short-term + pgvector long-term) is built in
-app/services/memory/. This tool writes directly to MemoryEntry so the agent
-loop has no circular dependency on the memory service layer.
-"""
+"""write_memory tool — persists episodic memory to pgvector."""
 
 import uuid
 
@@ -13,6 +8,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.db.models import MemoryEntry
 from app.infra import embeddings as embedder
 from app.infra.redact import redact
+from app.repositories import audit as audit_repo
+from app.repositories import memory as memory_repo
 
 logger = structlog.get_logger()
 
@@ -30,7 +27,13 @@ async def run(args: dict, user_id: uuid.UUID, conversation_id: str, session: Asy
         content=content,
         embedding=embedding,
     )
-    session.add(entry)
+    await memory_repo.insert(session, [entry])
+    await audit_repo.log(
+        session,
+        actor_id=user_id,
+        action="memory_write",
+        target={"type": "memory_entry", "id": str(entry.id), "conversation_id": conversation_id},
+    )
     await session.commit()
 
     logger.info("memory_written", user_id=str(user_id), conversation_id=conversation_id)

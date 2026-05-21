@@ -1,11 +1,16 @@
 """Tool definitions (OpenAI format) and dispatch table for the agent loop."""
 
+import json
 import uuid
 
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.agent.tools import classify, ner, rag, summarize, write_memory
-from app.domain.errors import ToolFailure
+from app.repositories import inference as inference_repo
+from app.schemas.errors import ToolFailure
+
+# Tools whose results are logged to inference_logs
+_INFERENCE_TOOLS = {"classify_issue", "extract_entities", "summarize_issue"}
 
 TOOL_DEFINITIONS: list[dict] = [
     {
@@ -93,16 +98,35 @@ async def dispatch(
     """Execute a tool by name and return the result as a string."""
     try:
         if name == "classify_issue":
-            return await classify.run(args)
-        if name == "extract_entities":
-            return await ner.run(args)
-        if name == "summarize_issue":
-            return await summarize.run(args)
-        if name == "search_knowledge_base":
+            result = await classify.run(args)
+        elif name == "extract_entities":
+            result = await ner.run(args)
+        elif name == "summarize_issue":
+            result = await summarize.run(args)
+        elif name == "search_knowledge_base":
             return await rag.run(args, session)
-        if name == "write_memory":
+        elif name == "write_memory":
             return await write_memory.run(args, user_id, conversation_id, session)
-        return f"Unknown tool: {name}"
+        else:
+            return f"Unknown tool: {name}"
+
+        if name in _INFERENCE_TOOLS:
+            try:
+                output = json.loads(result)
+            except (ValueError, TypeError):
+                output = {"result": result}
+            await inference_repo.log(
+                session,
+                user_id=user_id,
+                conversation_id=conversation_id,
+                tool=name,
+                input_=args,
+                output=output,
+            )
+            await session.commit()
+
+        return result
+
     except ToolFailure as exc:
         return f"Tool error ({exc.tool}): {exc.reason}"
     except Exception as exc:

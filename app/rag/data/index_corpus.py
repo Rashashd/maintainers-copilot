@@ -2,8 +2,8 @@
 Run the RAG corpus indexer from the command line.
 
 Usage:
-    python -m app.services.rag.data.index_corpus
-    python -m app.services.rag.data.index_corpus --parquet path/to/rag_corpus.parquet
+    python -m app.rag.data.index_corpus
+    python -m app.rag.data.index_corpus --parquet path/to/rag_corpus.parquet
 """
 import argparse
 import asyncio
@@ -11,11 +11,11 @@ import sys
 from pathlib import Path
 
 # ensure project root is on sys.path when run as a script
-sys.path.insert(0, str(Path(__file__).resolve().parents[4]))
+sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
 
 from app.db.session import async_session_factory
 from app.infra.embeddings import init_embedder
-from app.services.rag.indexer import index_corpus
+from app.rag.indexer import index_corpus
 
 _DEFAULT_PARQUET = Path(__file__).parent / "rag_corpus.parquet"
 

@@ -8,7 +8,7 @@ import structlog
 from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse
 
-from app.domain.errors import (
+from app.schemas.errors import (
     InvalidRequest,
     NotFoundError,
     PermissionDenied,

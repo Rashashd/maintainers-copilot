@@ -1,22 +1,11 @@
 from fastapi import APIRouter, Depends, HTTPException
-from pydantic import BaseModel, Field
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.db.session import get_session
-from app.services.rag import service as rag_service
+from app.core.deps import get_session
+from app.schemas.rag import AskRequest, AskResponse
+from app.services import rag as rag_service
 
 router = APIRouter(prefix="/rag", tags=["rag"])
-
-
-class AskRequest(BaseModel):
-    query: str
-    alpha: float = Field(default=0.6, ge=0.0, le=1.0)
-
-
-class AskResponse(BaseModel):
-    query: str
-    answer: str
-    contexts: list[str] = []
 
 
 @router.post("/ask", response_model=AskResponse)

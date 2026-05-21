@@ -1,26 +1,15 @@
 import uuid
-from datetime import datetime
 
 from fastapi import APIRouter, Depends, HTTPException, Query
-from pydantic import BaseModel
-from sqlalchemy import delete, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.db.models import MemoryEntry, User
-from app.db.session import get_session
-from app.services.auth import current_active_user
+from app.core.deps import current_active_user, get_session
+from app.db.models import User
+from app.repositories import audit as audit_repo
+from app.repositories import memory as memory_repo
+from app.schemas.memory import MemoryEntryRead
 
 router = APIRouter(prefix="/memory", tags=["memory"])
-
-
-class MemoryEntryRead(BaseModel):
-    id: uuid.UUID
-    conversation_id: str
-    role: str
-    content: str
-    created_at: datetime
-
-    model_config = {"from_attributes": True}
 
 
 @router.get("/history", response_model=list[MemoryEntryRead])
@@ -31,17 +20,13 @@ async def list_history(
     user: User = Depends(current_active_user),
     session: AsyncSession = Depends(get_session),
 ) -> list[MemoryEntryRead]:
-    stmt = (
-        select(MemoryEntry)
-        .where(MemoryEntry.user_id == user.id)
-        .order_by(MemoryEntry.created_at.desc())
-        .offset(offset)
-        .limit(limit)
+    return await memory_repo.list_entries(
+        session,
+        user_id=user.id,
+        conversation_id=conversation_id,
+        limit=limit,
+        offset=offset,
     )
-    if conversation_id:
-        stmt = stmt.where(MemoryEntry.conversation_id == conversation_id)
-    result = await session.execute(stmt)
-    return list(result.scalars().all())
 
 
 @router.delete("/{entry_id}", status_code=204)
@@ -50,17 +35,14 @@ async def delete_entry(
     user: User = Depends(current_active_user),
     session: AsyncSession = Depends(get_session),
 ) -> None:
-    result = await session.execute(
-        select(MemoryEntry).where(
-            MemoryEntry.id == entry_id, MemoryEntry.user_id == user.id
-        )
-    )
-    entry = result.scalar_one_or_none()
+    entry = await memory_repo.get_by_id(session, entry_id, user.id)
     if entry is None:
         raise HTTPException(status_code=404, detail="Memory entry not found.")
-    await session.execute(
-        delete(MemoryEntry).where(
-            MemoryEntry.id == entry_id, MemoryEntry.user_id == user.id
-        )
+    await memory_repo.delete_by_id(session, entry_id, user.id)
+    await audit_repo.log(
+        session,
+        actor_id=user.id,
+        action="deletion",
+        target={"type": "memory_entry", "id": str(entry_id)},
     )
     await session.commit()

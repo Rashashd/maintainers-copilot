@@ -61,6 +61,20 @@ class AuditLog(Base):
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
 
 
+class InferenceLog(Base):
+    """Records every model-server tool call for drift monitoring and debugging."""
+
+    __tablename__ = "inference_logs"
+
+    id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    user_id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), ForeignKey("user.id"), nullable=False)
+    conversation_id: Mapped[str] = mapped_column(String(255), nullable=False)
+    tool: Mapped[str] = mapped_column(String(50), nullable=False)  # classify_issue | extract_entities | summarize_issue
+    input_: Mapped[dict] = mapped_column("input", JSONB, nullable=False)
+    output: Mapped[dict] = mapped_column(JSONB, nullable=False)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+
+
 class Document(Base):
     """RAG corpus: project docs + resolved GitHub issues."""
 

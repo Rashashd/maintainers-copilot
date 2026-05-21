@@ -40,7 +40,7 @@ MAX_DOCS_ISSUES        = 1000
 MAX_COMMENTS_PER_ISSUE = 3
 SPLITS_DIR             = "ml/data/splits"
 DOCS_ISSUES_PATH       = "ml/data/raw/docs_issues.parquet"
-OUTPUT_PATH            = "app/services/rag/data/rag_corpus.parquet"
+OUTPUT_PATH            = "app/rag/data/rag_corpus.parquet"
 
 
 # HTTP helper

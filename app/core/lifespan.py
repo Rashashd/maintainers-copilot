@@ -6,12 +6,12 @@ from app.core.logging import configure_logging
 from app.core.startup_checks import run_startup_checks
 from app.infra import vault
 from app.infra.embeddings import init_embedder
-from app.infra.inference_client import init_inference_client
+from app.infra.inference import init_inference_client
 from app.infra.llm import init_llm_client
 from app.infra.minio import init_minio
 from app.infra.redis import init_redis
 from app.infra.tracing import init_tracing
-from app.services.rag.reranker import init_reranker
+from app.rag.reranker import init_reranker
 
 
 @asynccontextmanager

@@ -7,12 +7,12 @@ from app.db.models import Document
 from app.infra import embeddings as embedder
 from app.infra.llm import get_llm_client
 from app.infra.tracing import get_client, observe
-from app.services.rag import query_rewriter, retriever
-from app.services.rag.reranker import rerank
+from app.rag import query_rewriter, retriever
+from app.rag.reranker import rerank
 
 logger = structlog.get_logger()
 
-_PROMPTS = Path(__file__).parent / "prompts"
+_PROMPTS = Path(__file__).parent.parent / "rag" / "prompts"
 _answer_system = (_PROMPTS / "rag_answer.txt").read_text()
 
 _RETRIEVE_K = 50   # candidates from hybrid retrieval

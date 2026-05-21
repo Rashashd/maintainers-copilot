@@ -3,8 +3,8 @@ import pandas as pd
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.infra import embeddings as embedder
+from app.rag import chunker
 from app.repositories import documents as doc_repo
-from app.services.rag import chunker
 
 logger = structlog.get_logger()
 

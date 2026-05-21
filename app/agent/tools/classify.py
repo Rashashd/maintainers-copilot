@@ -1,6 +1,6 @@
 import json
 
-from app.infra.inference_client import get_inference_client
+from app.infra.inference import get_inference_client
 
 
 async def run(args: dict) -> str:
