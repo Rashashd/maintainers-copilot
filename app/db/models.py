@@ -1,6 +1,5 @@
 import uuid
 from datetime import datetime
-from typing import List
 
 from fastapi_users.db import SQLAlchemyBaseUserTableUUID
 from pgvector.sqlalchemy import Vector
@@ -15,8 +14,8 @@ class Base(DeclarativeBase):
 
 class User(SQLAlchemyBaseUserTableUUID, Base):
     role: Mapped[str] = mapped_column(String(20), default="user", nullable=False)
-    widgets: Mapped[List["Widget"]] = relationship(back_populates="owner")
-    memory_entries: Mapped[List["MemoryEntry"]] = relationship(back_populates="user")
+    widgets: Mapped[list["Widget"]] = relationship(back_populates="owner")
+    memory_entries: Mapped[list["MemoryEntry"]] = relationship(back_populates="user")
 
 
 class Widget(Base):
@@ -28,9 +27,13 @@ class Widget(Base):
     theme: Mapped[dict] = mapped_column(JSONB, nullable=False, default=dict)
     greeting: Mapped[str] = mapped_column(Text, default="How can I help you?")
     enabled_tools: Mapped[list] = mapped_column(ARRAY(Text), nullable=False, default=list)
-    owner_id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), ForeignKey("user.id"), nullable=False)
+    owner_id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True), ForeignKey("user.id"), nullable=False
+    )
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
-    updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), server_default=func.now(), onupdate=func.now()
+    )
 
     owner: Mapped["User"] = relationship(back_populates="widgets")
 
@@ -41,7 +44,9 @@ class MemoryEntry(Base):
     __tablename__ = "memory_entries"
 
     id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
-    user_id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), ForeignKey("user.id"), nullable=False)
+    user_id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True), ForeignKey("user.id"), nullable=False
+    )
     conversation_id: Mapped[str] = mapped_column(String(255), nullable=False)
     role: Mapped[str] = mapped_column(String(20), nullable=False)  # "user" | "assistant"
     content: Mapped[str] = mapped_column(Text, nullable=False)
@@ -56,7 +61,7 @@ class AuditLog(Base):
 
     id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     actor_id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), nullable=False)
-    action: Mapped[str] = mapped_column(String(50), nullable=False)  # role_change | memory_write | widget_edit | deletion
+    action: Mapped[str] = mapped_column(String(50), nullable=False)  # role_change | memory_write
     target: Mapped[dict] = mapped_column(JSONB, nullable=False)  # {"type": "...", "id": "..."}
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
 
@@ -67,9 +72,11 @@ class InferenceLog(Base):
     __tablename__ = "inference_logs"
 
     id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
-    user_id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), ForeignKey("user.id"), nullable=False)
+    user_id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True), ForeignKey("user.id"), nullable=False
+    )
     conversation_id: Mapped[str] = mapped_column(String(255), nullable=False)
-    tool: Mapped[str] = mapped_column(String(50), nullable=False)  # classify_issue | extract_entities | summarize_issue
+    tool: Mapped[str] = mapped_column(String(50), nullable=False)
     input_: Mapped[dict] = mapped_column("input", JSONB, nullable=False)
     output: Mapped[dict] = mapped_column(JSONB, nullable=False)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())

@@ -1,12 +1,10 @@
 """Tests for GET /memory/history and DELETE /memory/{id}."""
 
 import uuid
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
-
-from tests.conftest import TEST_USER_ID
 
 
 def _make_entry(entry_id=None, conv_id="conv-1", role="user", content="hello"):
@@ -15,7 +13,7 @@ def _make_entry(entry_id=None, conv_id="conv-1", role="user", content="hello"):
     entry.conversation_id = conv_id
     entry.role = role
     entry.content = content
-    entry.created_at = datetime(2026, 1, 1, tzinfo=timezone.utc)
+    entry.created_at = datetime(2026, 1, 1, tzinfo=UTC)
     return entry
 
 
@@ -46,7 +44,6 @@ async def test_list_history_empty(client, mock_session):
 
 @pytest.mark.asyncio
 async def test_list_history_requires_auth():
-    from unittest.mock import patch
 
     from httpx import ASGITransport, AsyncClient
 

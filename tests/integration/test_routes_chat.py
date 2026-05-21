@@ -8,28 +8,37 @@ from unittest.mock import AsyncMock, patch
 
 import pytest
 
+_AGENT = "app.services.chat.agent_loop.run"
+_LOAD = "app.services.chat.memory_service.load_history"
+_SAVE = "app.services.chat.memory_service.save_history"
+_PERSIST = "app.services.chat.memory_service.persist_turns"
+
 
 @pytest.mark.asyncio
 async def test_chat_returns_reply(client):
-    with patch("app.services.chat.agent_loop.run", new_callable=AsyncMock, return_value="Here is my answer."), \
-         patch("app.services.chat.memory_service.load_history", new_callable=AsyncMock, return_value=[]), \
-         patch("app.services.chat.memory_service.save_history", new_callable=AsyncMock), \
-         patch("app.services.chat.memory_service.persist_turns", new_callable=AsyncMock):
+    with (
+        patch(_AGENT, new_callable=AsyncMock, return_value="answer"),
+        patch(_LOAD, new_callable=AsyncMock, return_value=[]),
+        patch(_SAVE, new_callable=AsyncMock),
+        patch(_PERSIST, new_callable=AsyncMock),
+    ):
         resp = await client.post("/chat", json={"message": "Hello"})
 
     assert resp.status_code == 200
     body = resp.json()
-    assert body["reply"] == "Here is my answer."
+    assert body["reply"] == "answer"
     assert "conversation_id" in body
 
 
 @pytest.mark.asyncio
 async def test_chat_preserves_supplied_conversation_id(client):
     cid = "my-session-123"
-    with patch("app.services.chat.agent_loop.run", new_callable=AsyncMock, return_value="reply"), \
-         patch("app.services.chat.memory_service.load_history", new_callable=AsyncMock, return_value=[]), \
-         patch("app.services.chat.memory_service.save_history", new_callable=AsyncMock), \
-         patch("app.services.chat.memory_service.persist_turns", new_callable=AsyncMock):
+    with (
+        patch(_AGENT, new_callable=AsyncMock, return_value="reply"),
+        patch(_LOAD, new_callable=AsyncMock, return_value=[]),
+        patch(_SAVE, new_callable=AsyncMock),
+        patch(_PERSIST, new_callable=AsyncMock),
+    ):
         resp = await client.post("/chat", json={"message": "Hi", "conversation_id": cid})
 
     assert resp.json()["conversation_id"] == cid
@@ -38,10 +47,12 @@ async def test_chat_preserves_supplied_conversation_id(client):
 @pytest.mark.asyncio
 async def test_chat_passes_history_to_loop(client):
     stored = [{"role": "user", "content": "Previous message"}]
-    with patch("app.services.chat.agent_loop.run", new_callable=AsyncMock, return_value="ok") as mock_run, \
-         patch("app.services.chat.memory_service.load_history", new_callable=AsyncMock, return_value=stored), \
-         patch("app.services.chat.memory_service.save_history", new_callable=AsyncMock), \
-         patch("app.services.chat.memory_service.persist_turns", new_callable=AsyncMock):
+    with (
+        patch(_AGENT, new_callable=AsyncMock, return_value="ok") as mock_run,
+        patch(_LOAD, new_callable=AsyncMock, return_value=stored),
+        patch(_SAVE, new_callable=AsyncMock),
+        patch(_PERSIST, new_callable=AsyncMock),
+    ):
         await client.post("/chat", json={"message": "New message"})
 
     # mock stores a reference to the list, which gets mutated after run() returns.

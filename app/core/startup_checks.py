@@ -6,7 +6,12 @@ import yaml
 from app.core.config import get_settings
 from app.infra.redis import ping_redis
 from app.infra.tracing import ping_tracing
-from app.infra.vault import get_anthropic_api_key, get_langfuse_keys, get_openai_api_key, get_vault_client
+from app.infra.vault import (
+    get_anthropic_api_key,
+    get_langfuse_keys,
+    get_openai_api_key,
+    get_vault_client,
+)
 
 logger = structlog.get_logger()
 
@@ -34,7 +39,9 @@ class RedisUnreachable(RuntimeError):
 async def assert_vault_reachable() -> None:
     client = get_vault_client()
     if not await client.ping():
-        raise VaultUnreachable("Vault is unreachable or token is invalid. Cannot boot without secrets.")
+        raise VaultUnreachable(
+            "Vault is unreachable or token is invalid. Cannot boot without secrets."
+        )
 
 
 async def assert_tracing_configured() -> None:
@@ -52,14 +59,18 @@ def assert_eval_thresholds_nonzero() -> None:
         with open(settings.eval_thresholds_path) as f:
             thresholds = yaml.safe_load(f)
     except FileNotFoundError:
-        raise EvalThresholdsDisabled(f"eval_thresholds.yaml not found at {settings.eval_thresholds_path}")
+        raise EvalThresholdsDisabled(
+            f"eval_thresholds.yaml not found at {settings.eval_thresholds_path}"
+        )
 
     def _walk(node: object, path: str = "") -> None:
         if isinstance(node, dict):
             for k, v in node.items():
                 _walk(v, f"{path}.{k}" if path else k)
         elif node in (0, 0.0, None, False, ""):
-            raise EvalThresholdsDisabled(f"Threshold '{path}' is zero or disabled — eval gate is off.")
+            raise EvalThresholdsDisabled(
+                f"Threshold '{path}' is zero or disabled — eval gate is off."
+            )
 
     _walk(thresholds)
 

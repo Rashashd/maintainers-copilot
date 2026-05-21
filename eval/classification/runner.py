@@ -121,7 +121,7 @@ async def main(inference_url: str, golden_path: Path) -> int:
             })
 
     metrics = compute_metrics(results)
-    print(f"\nResults:")
+    print("\nResults:")
     print(f"  Accuracy:  {metrics['accuracy']:.4f}")
     print(f"  Macro-F1:  {metrics['macro_f1']:.4f}")
     print(f"  Per-class: {metrics['per_class_f1']}")

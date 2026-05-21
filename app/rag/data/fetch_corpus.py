@@ -254,10 +254,12 @@ def main():
     core_excluded = load_core_excluded()
     docs_excluded = load_docs_excluded()
 
-    print(f"\nFetching core issues (max {MAX_CORE_ISSUES}, skipping {len(core_excluded):,} split IDs)...")
+    n_core = len(core_excluded)
+    print(f"\nFetching core issues (max {MAX_CORE_ISSUES}, skipping {n_core:,} split IDs)...")
     core = fetch_core_issues(core_excluded)
 
-    print(f"\nFetching .io docs issues (max {MAX_DOCS_ISSUES}, skipping {len(docs_excluded):,} already-used IDs)...")
+    n_docs = len(docs_excluded)
+    print(f"\nFetching .io docs issues (max {MAX_DOCS_ISSUES}, skipping {n_docs:,} already-used IDs)...")  # noqa: E501
     docs = fetch_docs_issues(docs_excluded)
 
     df = pd.DataFrame(core + docs)

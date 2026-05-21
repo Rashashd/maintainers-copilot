@@ -3,19 +3,15 @@
 No real API calls are made; OpenAI and Anthropic SDK clients are mocked.
 """
 
-import json
 from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 
 from app.infra.llm import (
-    ChatResponse,
     LLMClient,
-    ToolCall,
     _to_anthropic_messages,
     _to_anthropic_tools,
 )
-
 
 # ── _to_anthropic_messages ────────────────────────────────────────────────────
 
@@ -153,7 +149,9 @@ def test_tool_format_conversion():
 
 
 def test_tool_missing_description_defaults_empty():
-    tools = [{"type": "function", "function": {"name": "t", "parameters": {"type": "object", "properties": {}}}}]
+    tools = [{"type": "function", "function": {
+        "name": "t", "parameters": {"type": "object", "properties": {}},
+    }}]
     assert _to_anthropic_tools(tools)[0]["description"] == ""
 
 

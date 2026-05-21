@@ -24,9 +24,10 @@ import yaml
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
 from dotenv import load_dotenv
+
 load_dotenv(Path(__file__).resolve().parents[2] / ".env")
 
-from eval.rag import generation_eval, retrieval_eval
+from eval.rag import generation_eval, retrieval_eval  # noqa: E402
 
 
 def _inject_llm_keys_from_vault(vault_addr: str, vault_token: str) -> None:
@@ -94,7 +95,8 @@ async def main(api_url: str, run_sweep: bool, run_ragas: bool) -> int:
 
     best = max(sweep, key=lambda r: r[f"hit_at_{_K}"])
     report["best_alpha"] = best["alpha"]
-    print(f"\nBest alpha: {best['alpha']}  hit@{_K}={best[f'hit_at_{_K}']:.4f}  MRR={best['mrr']:.4f}")
+    hit = best[f"hit_at_{_K}"]
+    print(f"\nBest alpha: {best['alpha']}  hit@{_K}={hit:.4f}  MRR={best['mrr']:.4f}")
 
     # ── Generation eval (RAGAS) ───────────────────────────────────────────────
     if run_ragas:

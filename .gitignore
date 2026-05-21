@@ -10,6 +10,11 @@ __pycache__/
 *.egg-info/
 dist/
 build/
+.ruff_cache/
+.pytest_cache/
+.mypy_cache/
+.coverage
+htmlcov/
 
 # ML artifacts
 # Large raw data — fetched at runtime via fetch.py
@@ -18,7 +23,7 @@ ml/data/raw/
 # .pt / .safetensors / .pkl are tracked via Git LFS (see .gitattributes)
 
 # RAG corpus — fetched at runtime, not committed
-app/services/rag/data/*.parquet
+app/rag/data/*.parquet
 
 # Logs — write to logs/ locally, never commit
 # logs/ directory is tracked (via logs/.gitkeep) but its contents are not

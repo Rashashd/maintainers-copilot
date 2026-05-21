@@ -37,7 +37,8 @@ async def test_rag_ask_alpha_default(client):
         await client.post("/rag/ask", json={"query": "What is Home Assistant?"})
 
     _, kwargs = mock_answer.call_args
-    assert kwargs.get("alpha", mock_answer.call_args[0][2] if len(mock_answer.call_args[0]) > 2 else 0.6) == 0.6
+    positional_alpha = mock_answer.call_args[0][2] if len(mock_answer.call_args[0]) > 2 else 0.6
+    assert kwargs.get("alpha", positional_alpha) == 0.6
 
 
 @pytest.mark.asyncio

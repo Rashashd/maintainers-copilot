@@ -32,7 +32,10 @@ TOOL_DEFINITIONS: list[dict] = [
         "type": "function",
         "function": {
             "name": "extract_entities",
-            "description": "Extract technical entities (function names, file paths, error codes) from issue text.",
+            "description": (
+                "Extract technical entities (function names, file paths,"
+                " error codes) from issue text."
+            ),
             "parameters": {
                 "type": "object",
                 "properties": {
@@ -50,8 +53,14 @@ TOOL_DEFINITIONS: list[dict] = [
             "parameters": {
                 "type": "object",
                 "properties": {
-                    "text": {"type": "string", "description": "Full issue text including comments."},
-                    "max_sentences": {"type": "integer", "description": "Max sentences in summary (default 3)."},
+                    "text": {
+                        "type": "string",
+                        "description": "Full issue text including comments.",
+                    },
+                    "max_sentences": {
+                        "type": "integer",
+                        "description": "Max sentences in summary (default 3).",
+                    },
                 },
                 "required": ["text"],
             },
@@ -75,7 +84,10 @@ TOOL_DEFINITIONS: list[dict] = [
         "type": "function",
         "function": {
             "name": "write_memory",
-            "description": "Save an important fact or piece of context to long-term memory for future conversations.",
+            "description": (
+                "Save an important fact or piece of context to long-term memory"
+                " for future conversations."
+            ),
             "parameters": {
                 "type": "object",
                 "properties": {

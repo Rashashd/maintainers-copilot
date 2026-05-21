@@ -1,8 +1,9 @@
-import requests
-import pandas as pd
-import time
-import random
 import os
+import random
+import time
+
+import pandas as pd
+import requests
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -87,7 +88,7 @@ def fetch_issues():
             if not created_at:
                 continue
 
-            labels = [l["name"].lower() for l in issue.get("labels", [])]
+            labels = [lbl["name"].lower() for lbl in issue.get("labels", [])]
 
             if issue["id"] not in issues:
                 issues[issue["id"]] = {

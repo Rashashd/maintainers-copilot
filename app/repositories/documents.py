@@ -75,10 +75,12 @@ async def fts_search(
     limit: int = 50,
     filters: dict | None = None,
 ) -> list[Document]:
-    tsquery = text("plainto_tsquery('english', :q)").bindparams(q=query_text)
-    tsvector = text("to_tsvector('english', content)")
-    rank_expr = text("ts_rank(to_tsvector('english', content), plainto_tsquery('english', :q))").bindparams(q=query_text)
-    match_expr = text("to_tsvector('english', content) @@ plainto_tsquery('english', :q)").bindparams(q=query_text)
+    rank_expr = text(
+        "ts_rank(to_tsvector('english', content), plainto_tsquery('english', :q))"
+    ).bindparams(q=query_text)
+    match_expr = text(
+        "to_tsvector('english', content) @@ plainto_tsquery('english', :q)"
+    ).bindparams(q=query_text)
 
     stmt = select(Document).where(match_expr)
     if filters:

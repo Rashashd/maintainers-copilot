@@ -1,7 +1,7 @@
 """Unit tests for the memory service (Redis + pgvector persistence)."""
 
 import uuid
-from unittest.mock import AsyncMock, MagicMock, patch, call
+from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 
@@ -42,7 +42,12 @@ async def test_persist_turns_creates_two_memory_entries():
     mock_session.add = MagicMock()
     fake_vectors = [[0.1] * 768, [0.2] * 768]
 
-    with patch("app.services.memory.embedder.embed_texts", new_callable=AsyncMock, return_value=fake_vectors):
+    _embed = patch(
+        "app.services.memory.embedder.embed_texts",
+        new_callable=AsyncMock,
+        return_value=fake_vectors,
+    )
+    with _embed:
         await memory_service.persist_turns(
             USER_ID, CONV_ID, "user message", "assistant reply", mock_session
         )

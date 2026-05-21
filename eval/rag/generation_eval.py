@@ -52,7 +52,9 @@ async def run(items: list[dict], api_url: str, alpha: float) -> dict:
     async with httpx.AsyncClient(base_url=api_url, timeout=60.0) as client:
         for item in items:
             try:
-                resp = await client.post("/rag/ask", json={"query": item["question"], "alpha": alpha})
+                resp = await client.post(
+                    "/rag/ask", json={"query": item["question"], "alpha": alpha}
+                )
                 resp.raise_for_status()
                 body = resp.json()
                 questions.append(item["question"])

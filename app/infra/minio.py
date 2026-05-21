@@ -59,7 +59,9 @@ class MinIOClient:
 
         await asyncio.to_thread(_create)
 
-    async def upload_bytes(self, bucket: str, key: str, data: bytes, content_type: str = "application/octet-stream") -> None:
+    async def upload_bytes(
+        self, bucket: str, key: str, data: bytes, content_type: str = "application/octet-stream"
+    ) -> None:
         await self.ensure_bucket(bucket)
         await asyncio.to_thread(
             self._s3.upload_fileobj,

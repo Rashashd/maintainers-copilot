@@ -6,7 +6,7 @@ real network or DB calls.
 """
 
 import uuid
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import AsyncMock, patch
 
 import pytest
 
@@ -59,8 +59,9 @@ async def test_single_tool_call_then_text():
     )
     mock_session = AsyncMock()
 
-    with patch("app.agent.loop.get_llm_client", return_value=mock_llm), \
-         patch("app.agent.loop.dispatch", new_callable=AsyncMock, return_value="bug") as mock_dispatch:
+    _llm = patch("app.agent.loop.get_llm_client", return_value=mock_llm)
+    _dispatch = patch("app.agent.loop.dispatch", new_callable=AsyncMock, return_value="bug")
+    with _llm, _dispatch as mock_dispatch:
         result = await run(
             messages=[{"role": "user", "content": "What type is this?"}],
             user_id=USER_ID,
@@ -109,8 +110,10 @@ async def test_tool_error_does_not_crash_loop():
     )
     mock_session = AsyncMock()
 
-    with patch("app.agent.loop.get_llm_client", return_value=mock_llm), \
-         patch("app.agent.loop.dispatch", new_callable=AsyncMock, return_value="Tool error (search_knowledge_base): timeout"):
+    _tool_err = "Tool error (search_knowledge_base): timeout"
+    _llm = patch("app.agent.loop.get_llm_client", return_value=mock_llm)
+    _dispatch = patch("app.agent.loop.dispatch", new_callable=AsyncMock, return_value=_tool_err)
+    with _llm, _dispatch:
         result = await run(
             messages=[{"role": "user", "content": "Find auth docs"}],
             user_id=USER_ID,

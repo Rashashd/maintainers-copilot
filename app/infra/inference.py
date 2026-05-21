@@ -65,7 +65,9 @@ class InferenceClient:
             data = resp.json()
             return ClassifyResult(label=data["label"], scores=data["scores"])
         except httpx.HTTPStatusError as exc:
-            raise ToolFailure("classify", f"HTTP {exc.response.status_code}: {exc.response.text}") from exc
+            raise ToolFailure(
+                "classify", f"HTTP {exc.response.status_code}: {exc.response.text}"
+            ) from exc
         except httpx.RequestError as exc:
             raise ToolFailure("classify", f"Connection error: {exc}") from exc
 
@@ -80,7 +82,9 @@ class InferenceClient:
             data = resp.json()
             return NERResult(entities=[Entity(**e) for e in data["entities"]])
         except httpx.HTTPStatusError as exc:
-            raise ToolFailure("ner", f"HTTP {exc.response.status_code}: {exc.response.text}") from exc
+            raise ToolFailure(
+                "ner", f"HTTP {exc.response.status_code}: {exc.response.text}"
+            ) from exc
         except httpx.RequestError as exc:
             raise ToolFailure("ner", f"Connection error: {exc}") from exc
 
@@ -94,7 +98,9 @@ class InferenceClient:
             data = resp.json()
             return SummarizeResult(summary=data["summary"])
         except httpx.HTTPStatusError as exc:
-            raise ToolFailure("summarize", f"HTTP {exc.response.status_code}: {exc.response.text}") from exc
+            raise ToolFailure(
+                "summarize", f"HTTP {exc.response.status_code}: {exc.response.text}"
+            ) from exc
         except httpx.RequestError as exc:
             raise ToolFailure("summarize", f"Connection error: {exc}") from exc
 
@@ -114,5 +120,7 @@ def init_inference_client() -> InferenceClient:
 
 def get_inference_client() -> InferenceClient:
     if _client is None:
-        raise RuntimeError("Inference client not initialised — call init_inference_client() in lifespan first.")
+        raise RuntimeError(
+            "Inference client not initialised — call init_inference_client() in lifespan first."
+        )
     return _client

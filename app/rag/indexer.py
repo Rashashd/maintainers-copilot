@@ -1,5 +1,5 @@
-import structlog
 import pandas as pd
+import structlog
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.infra import embeddings as embedder
@@ -24,7 +24,11 @@ async def index_corpus(parquet_path: str, session: AsyncSession) -> int:
     # ── skip already-indexed issues ───────────────────────────────────────────
     all_source_ids = [row.get("url") or str(row.get("number", "")) for _, row in df.iterrows()]
     already_indexed = await doc_repo.fetch_indexed_source_ids(session, all_source_ids)
-    logger.info("indexer_resume_check", already_indexed=len(already_indexed), remaining=len(df) - len(already_indexed))
+    logger.info(
+        "indexer_resume_check",
+        already_indexed=len(already_indexed),
+        remaining=len(df) - len(already_indexed),
+    )
 
     # ── chunk ─────────────────────────────────────────────────────────────────
     all_chunks: list[dict] = []
