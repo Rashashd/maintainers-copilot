@@ -13,10 +13,11 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 class Settings(BaseSettings):
     model_config = SettingsConfigDict(env_file=".env", extra="ignore", case_sensitive=False)
 
-    # Full URL injected by docker-compose (includes DB_PASSWORD from .env).
-    # The app uses this URL only to connect; the password also lives in Vault
-    # (written by seed.sh) so the app never reads DB_PASSWORD from env directly.
-    database_url: str = "postgresql+asyncpg://dbadmin:changeme@localhost:5432/copilot"
+    # DB topology — no password; full URL assembled in lifespan after Vault loads
+    db_host: str = "localhost"
+    db_port: int = 5432
+    db_user: str = "dbadmin"
+    db_name: str = "copilot"
 
     # Redis
     redis_url: str = "redis://localhost:6379"

@@ -13,7 +13,9 @@ from pathlib import Path
 # ensure project root is on sys.path when run as a script
 sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
 
-from app.db.session import async_session_factory
+from app.core.config import get_settings
+from app.db.session import async_session_factory, init_db
+from app.infra import vault
 from app.infra.embeddings import init_embedder
 from app.rag.indexer import index_corpus
 
@@ -25,9 +27,17 @@ async def main(parquet_path: Path) -> None:
         print(f"ERROR: parquet file not found: {parquet_path}")
         sys.exit(1)
 
+    await vault.load_all()
+    s = get_settings()
+    init_db(
+        f"postgresql+asyncpg://{s.db_user}:{vault.get_db_password()}"
+        f"@{s.db_host}:{s.db_port}/{s.db_name}"
+    )
+
     print("Loading embedding model...")
     init_embedder()
 
+    assert async_session_factory is not None
     async with async_session_factory() as session:
         print(f"Indexing corpus from: {parquet_path}")
         n = await index_corpus(str(parquet_path), session)

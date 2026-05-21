@@ -16,22 +16,18 @@ Columns: id, number, title, body, comments (list[str]), url,
          source_repo, created_at, closed_at
 """
 
+import asyncio
 import os
 import random
 import time
 
 import pandas as pd
 import requests
-from dotenv import load_dotenv
 
-load_dotenv()
+from app.infra import vault
 
 CORE_REPO = "home-assistant/core"
 DOCS_REPO = "home-assistant/home-assistant.io"
-HEADERS = {
-    "Accept": "application/vnd.github+json",
-    "Authorization": f"Bearer {os.getenv('GITHUB_TOKEN')}",
-}
 
 PER_PAGE               = 100
 MAX_RETRIES            = 5
@@ -41,6 +37,9 @@ MAX_COMMENTS_PER_ISSUE = 3
 SPLITS_DIR             = "ml/data/splits"
 DOCS_ISSUES_PATH       = "ml/data/raw/docs_issues.parquet"
 OUTPUT_PATH            = "app/rag/data/rag_corpus.parquet"
+
+# Populated in main() after Vault loads — not at import time
+HEADERS: dict[str, str] = {}
 
 
 # HTTP helper
@@ -196,7 +195,7 @@ def fetch_core_issues(excluded: set[int], max_issues: int = MAX_CORE_ISSUES) -> 
     return issues
 
 
-# Fetch docs issues (home-assistant.io) ─────────────────────────────────────
+# Fetch docs issues (home-assistant.io)
 
 def fetch_docs_issues(excluded: set[int], max_issues: int = MAX_DOCS_ISSUES) -> list[dict]:
     issues: list[dict] = []
@@ -251,6 +250,12 @@ def fetch_docs_issues(excluded: set[int], max_issues: int = MAX_DOCS_ISSUES) -> 
 # Entry point
 
 def main():
+    asyncio.run(vault.load_all())
+    HEADERS.update({
+        "Accept": "application/vnd.github+json",
+        "Authorization": f"Bearer {vault.get_github_token()}",
+    })
+
     core_excluded = load_core_excluded()
     docs_excluded = load_docs_excluded()
 
@@ -264,7 +269,7 @@ def main():
 
     df = pd.DataFrame(core + docs)
     if df.empty:
-        print("No issues collected. Check your GITHUB_TOKEN.")
+        print("No issues collected. Check that GITHUB_TOKEN is seeded in Vault.")
         return
 
     df = df.drop_duplicates(subset=["id"]).reset_index(drop=True)

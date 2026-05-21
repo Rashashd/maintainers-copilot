@@ -47,13 +47,21 @@ async def test_list_history_requires_auth():
 
     from httpx import ASGITransport, AsyncClient
 
+    from app.db.session import get_session
     from app.main import app
     from app.services.auth import current_active_user
 
+    async def _mock_session():
+        yield MagicMock()
+
     app.dependency_overrides.pop(current_active_user, None)
-    with patch("app.services.auth.vault.get_jwt_signing_key", return_value="test-secret"):
-        async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as ac:
-            resp = await ac.get("/memory/history")
+    app.dependency_overrides[get_session] = _mock_session
+    try:
+        with patch("app.services.auth.vault.get_jwt_signing_key", return_value="test-secret"):
+            async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as ac:
+                resp = await ac.get("/memory/history")
+    finally:
+        app.dependency_overrides.pop(get_session, None)
 
     assert resp.status_code == 401
 

@@ -71,8 +71,11 @@ services:
       context: .
       dockerfile: app/Dockerfile
     environment:
-      # Only infra topology — no secrets here; app reads secrets from Vault at startup
-      DATABASE_URL: postgresql+asyncpg://dbadmin:${DB_PASSWORD}@db:5432/copilot
+      # Infra topology only — no secrets; DB password and all API keys come from Vault
+      DB_HOST: db
+      DB_PORT: 5432
+      DB_USER: dbadmin
+      DB_NAME: copilot
       REDIS_URL: redis://redis:6379
       VAULT_ADDR: http://vault:8200
       VAULT_TOKEN: ${VAULT_TOKEN}
