@@ -1,7 +1,18 @@
 import logging
 import sys
+from typing import Any
 
 import structlog
+
+from app.infra.redact import redact
+
+
+def _redacting_processor(logger: Any, method: str, event_dict: dict) -> dict:
+    """Structlog processor: redact all string values before they leave the process."""
+    for key, value in event_dict.items():
+        if isinstance(value, str):
+            event_dict[key] = redact(value)
+    return event_dict
 
 
 def configure_logging(debug: bool = False) -> None:
@@ -14,6 +25,7 @@ def configure_logging(debug: bool = False) -> None:
         structlog.processors.TimeStamper(fmt="iso", utc=True),
         structlog.processors.StackInfoRenderer(),
         structlog.dev.set_exc_info,
+        _redacting_processor,
     ]
 
     renderer = structlog.dev.ConsoleRenderer() if debug else structlog.processors.JSONRenderer()

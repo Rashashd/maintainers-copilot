@@ -5,8 +5,13 @@ from fastapi import FastAPI
 from app.core.logging import configure_logging
 from app.core.startup_checks import run_startup_checks
 from app.infra import vault
+from app.infra.embeddings import init_embedder
+from app.infra.inference_client import init_inference_client
 from app.infra.llm import init_llm_client
+from app.infra.minio import init_minio
+from app.infra.redis import init_redis
 from app.infra.tracing import init_tracing
+from app.services.rag.reranker import init_reranker
 
 
 @asynccontextmanager
@@ -28,7 +33,16 @@ async def lifespan(app: FastAPI):
         anthropic_key=vault.get_anthropic_api_key(),
     )
 
-    # 5. Run refuse-to-boot checks
+    # 5. Load embedding and reranking models into memory
+    init_embedder()
+    init_reranker()
+
+    # 6. Init infrastructure clients
+    init_redis()
+    init_minio()
+    init_inference_client()
+
+    # 7. Run refuse-to-boot checks
     await run_startup_checks()
 
     yield

@@ -16,7 +16,7 @@ class Settings(BaseSettings):
     # Full URL injected by docker-compose (includes DB_PASSWORD from .env).
     # The app uses this URL only to connect; the password also lives in Vault
     # (written by seed.sh) so the app never reads DB_PASSWORD from env directly.
-    database_url: str = "postgresql+asyncpg://copilot:changeme@localhost:5432/copilot"
+    database_url: str = "postgresql+asyncpg://dbadmin:changeme@localhost:5432/copilot"
 
     # Redis
     redis_url: str = "redis://localhost:6379"
