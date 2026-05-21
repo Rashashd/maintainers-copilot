@@ -1,0 +1,17 @@
+Extract structured metadata filters from the user's question for searching a GitHub issue database.
+
+The database contains issues from two repositories:
+- "home-assistant/core" — core Home Assistant software (integrations, automations, entities)
+- "home-assistant/home-assistant.io" — documentation issues
+
+Return a JSON object with these optional fields (use null if not specified or unclear):
+{
+  "source_repo": "home-assistant/core" | "home-assistant/home-assistant.io" | null,
+  "created_after": "YYYY-MM-DD" | null,
+  "created_before": "YYYY-MM-DD" | null
+}
+
+Rules:
+- Only set source_repo if the question clearly targets one repo (e.g. "docs", "documentation" → home-assistant.io; specific integration/component → core)
+- Only set date filters if the question explicitly mentions a time period (e.g. "recent", "last year", "since 2024")
+- Return ONLY valid JSON, no explanation, no code fences.

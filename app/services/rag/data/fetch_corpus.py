@@ -11,7 +11,7 @@ Two separate exclusion sets prevent data leakage from each source:
   - core_excluded  : train/val/test split IDs  (classifier training data)
   - docs_excluded  : docs_issues.parquet IDs   (classifier docs augmentation)
 
-Output: ml/data/raw/rag_corpus.parquet
+Output: /rag_corpus.parquet
 Columns: id, number, title, body, comments (list[str]), url,
          source_repo, created_at, closed_at
 """
@@ -36,14 +36,14 @@ HEADERS = {
 PER_PAGE               = 100
 MAX_RETRIES            = 5
 MAX_CORE_ISSUES        = 3000
-MAX_DOCS_ISSUES        = 500
+MAX_DOCS_ISSUES        = 1000
 MAX_COMMENTS_PER_ISSUE = 3
 SPLITS_DIR             = "ml/data/splits"
 DOCS_ISSUES_PATH       = "ml/data/raw/docs_issues.parquet"
 OUTPUT_PATH            = "app/services/rag/data/rag_corpus.parquet"
 
 
-# ── HTTP helper ───────────────────────────────────────────────────────────────
+# HTTP helper
 
 def safe_request(url: str) -> requests.Response | None:
     for attempt in range(1, MAX_RETRIES + 1):
@@ -87,7 +87,7 @@ def _next_url(link_header: str | None) -> str | None:
     return None
 
 
-# ── Exclusion sets ────────────────────────────────────────────────────────────
+# Exclusion sets
 
 def load_core_excluded() -> set[int]:
     """IDs from classifier train/val/test — must not appear in core RAG issues."""
@@ -122,7 +122,7 @@ def load_docs_excluded() -> set[int]:
     return ids
 
 
-# ── Fetch comments for a single issue ────────────────────────────────────────
+# Fetch comments for a single issue
 
 def fetch_comments(repo: str, issue_number: int, max_comments: int) -> list[str]:
     url = (
@@ -138,7 +138,7 @@ def fetch_comments(repo: str, issue_number: int, max_comments: int) -> list[str]
     return [c.get("body", "") for c in data[:max_comments] if c.get("body")]
 
 
-# ── Fetch core issues (with maintainer comments) ──────────────────────────────
+# Fetch core issues (with maintainer comments)
 
 def fetch_core_issues(excluded: set[int], max_issues: int = MAX_CORE_ISSUES) -> list[dict]:
     issues: list[dict] = []
@@ -196,7 +196,7 @@ def fetch_core_issues(excluded: set[int], max_issues: int = MAX_CORE_ISSUES) -> 
     return issues
 
 
-# ── Fetch docs issues (home-assistant.io) ─────────────────────────────────────
+# Fetch docs issues (home-assistant.io) ─────────────────────────────────────
 
 def fetch_docs_issues(excluded: set[int], max_issues: int = MAX_DOCS_ISSUES) -> list[dict]:
     issues: list[dict] = []
@@ -248,7 +248,7 @@ def fetch_docs_issues(excluded: set[int], max_issues: int = MAX_DOCS_ISSUES) -> 
     return issues
 
 
-# ── Entry point ───────────────────────────────────────────────────────────────
+# Entry point
 
 def main():
     core_excluded = load_core_excluded()
