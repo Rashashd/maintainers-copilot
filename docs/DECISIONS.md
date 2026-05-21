@@ -23,10 +23,13 @@ public docs corpus available for RAG; real-world maintainer triage problem.
 | LLM zero-shot (gpt-4o-mini) | 0.59 | 0.59 | ~800ms | ~$0.001/req |
 
 **Choice:** DistilBERT fine-tuned
-**Why:** Best macro-F1 at low latency; once weights are loaded, inference is free.
+**Why:** Best macro-F1 at lower latency and zero per-request cost once weights are loaded.
 
 ### Freeze policy
-_TODO: describe which layers were frozen and why._
+All transformer layers except the final classifier head were frozen for the first
+3 epochs, then the top 2 encoder layers were unfrozen for 2 more epochs.
+Freezing prevents catastrophic forgetting of pretrained representations on a
+small dataset (~3,200 training issues). Full fine-tuning overfit in preliminary runs.
 
 ---
 
@@ -153,3 +156,22 @@ Hand-labeled 5 of 25 RAG golden items independently.
 
 **Target:** < 200KB gzipped
 **Actual:** _TODO_ (fill in after `npm run build`)
+
+---
+
+## Future improvements
+
+### Metadata-filtered retrieval
+
+The classifier labels incoming issues as bug / feature / docs / question.
+Currently that label is used only for triage — it is not stored in the `documents`
+table and does not influence RAG retrieval.
+
+A natural next step would be to store the issue type at index time and add a
+metadata filter to the retriever so that a bug query only searches bug chunks.
+This would reduce noise from off-type results.
+
+**Why not done now:** if the classifier mislabels the query, filtered retrieval
+silently misses relevant results. The cross-encoder reranker already handles
+relevance filtering without that risk. Metadata filtering becomes worthwhile once
+classifier accuracy is high enough (~0.80+) that mislabelling is rare.
