@@ -1,0 +1,23 @@
+{
+  "api_url": "http://localhost:8000",
+  "n": 25,
+  "sweep": [
+    {
+      "alpha": 0.6,
+      "hit_at_5": 0.8,
+      "mrr": 0.8,
+      "ndcg_at_5": 0.8
+    }
+  ],
+  "best_alpha": 0.6,
+  "generation": {
+    "faithfulness": 0.7133,
+    "answer_relevancy": 0.6549,
+    "context_recall": 0.58
+  },
+  "violations": [
+    "faithfulness 0.7133 < threshold 0.75",
+    "context_recall 0.5800 < threshold 0.7"
+  ],
+  "passed": false
+}

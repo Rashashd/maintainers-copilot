@@ -1,0 +1,25 @@
+{"question": "Why does my Philips Hue light stop responding after the latest update?", "ideal_answer": "This is a regression bug introduced in 2024. The Hue integration fails to refresh tokens correctly.", "ground_truth_source_ids": []}
+{"question": "My thermostat shows the wrong temperature in the dashboard.", "ideal_answer": "Bug in the climate integration — sensor values are cached incorrectly.", "ground_truth_source_ids": []}
+{"question": "Automations don't trigger when I restart Home Assistant.", "ideal_answer": "Known bug: startup events aren't firing until the scheduler initializes.", "ground_truth_source_ids": []}
+{"question": "Why does the Z-Wave integration crash with Python 3.12?", "ideal_answer": "Compatibility bug — upstream library hasn't been patched for Python 3.12.", "ground_truth_source_ids": []}
+{"question": "My dashboard cards disappear after upgrading to 2025.5.", "ideal_answer": "UI rendering bug caused by breaking changes in Lovelace.", "ground_truth_source_ids": []}
+{"question": "Can we add Matter protocol support for smart plugs?", "ideal_answer": "Feature request — extend Matter integration to cover plug devices.", "ground_truth_source_ids": []}
+{"question": "I'd like native support for Tesla vehicles.", "ideal_answer": "Feature request — add Tesla API integration for charging and climate control.", "ground_truth_source_ids": []}
+{"question": "Could Home Assistant support multiple dashboards per user?", "ideal_answer": "Feature request — allow per-user dashboard customization.", "ground_truth_source_ids": []}
+{"question": "Can we add dark mode scheduling?", "ideal_answer": "Feature request — toggle UI themes automatically based on time.", "ground_truth_source_ids": []}
+{"question": "Please add integration with WhatsApp notifications.", "ideal_answer": "Feature request — support WhatsApp API for automation alerts.", "ground_truth_source_ids": []}
+{"question": "The MQTT setup guide is missing broker configuration details.", "ideal_answer": "Documentation issue — add broker setup steps to the MQTT guide.", "ground_truth_source_ids": []}
+{"question": "The YAML automation examples don't explain triggers clearly.", "ideal_answer": "Docs improvement — clarify trigger syntax with examples.", "ground_truth_source_ids": []}
+{"question": "The installation guide doesn't mention Windows WSL.", "ideal_answer": "Docs update — add WSL installation instructions.", "ground_truth_source_ids": []}
+{"question": "The REST API docs don't show authentication examples.", "ideal_answer": "Docs fix — include curl examples with tokens.", "ground_truth_source_ids": []}
+{"question": "The Lovelace card docs don't explain conditional cards.", "ideal_answer": "Docs improvement — add conditional card usage examples.", "ground_truth_source_ids": []}
+{"question": "How do I connect Home Assistant to my Google Nest?", "ideal_answer": "Use the Nest integration with OAuth credentials.", "ground_truth_source_ids": []}
+{"question": "Can I run Home Assistant in Docker on Synology NAS?", "ideal_answer": "Yes — use the official Docker image, but disable Synology's auto-updates.", "ground_truth_source_ids": []}
+{"question": "How do I back up my Home Assistant configuration?", "ideal_answer": "Use the built-in backup tool or snapshot add-on.", "ground_truth_source_ids": []}
+{"question": "Can I trigger automations with NFC tags?", "ideal_answer": "Yes — supported via the mobile app's NFC integration.", "ground_truth_source_ids": []}
+{"question": "How do I migrate from YAML automations to the UI editor?", "ideal_answer": "Use the automation editor; YAML configs can be imported.", "ground_truth_source_ids": []}
+{"question": "Can I use Home Assistant without internet?", "ideal_answer": "Yes — most integrations work locally, but cloud services won't.", "ground_truth_source_ids": []}
+{"question": "How do I secure Home Assistant with HTTPS?", "ideal_answer": "Use Let's Encrypt add-on or reverse proxy with SSL.", "ground_truth_source_ids": []}
+{"question": "Can I integrate Home Assistant with Apple HomeKit?", "ideal_answer": "Yes — enable the HomeKit integration in settings.", "ground_truth_source_ids": []}
+{"question": "How do I monitor energy usage with smart meters?", "ideal_answer": "Use the Energy dashboard with supported meter integrations.", "ground_truth_source_ids": []}
+{"question": "Can I control Home Assistant with voice commands?", "ideal_answer": "Yes — via Alexa, Google Assistant, or local voice assistants.", "ground_truth_source_ids": []}
