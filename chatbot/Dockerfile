@@ -1,5 +1,6 @@
 FROM python:3.12-slim
 WORKDIR /app
+RUN apt-get update && apt-get install -y --no-install-recommends curl && rm -rf /var/lib/apt/lists/*
 RUN pip install --no-cache-dir streamlit==1.40.0 httpx==0.28.0
 COPY chatbot/ .
 EXPOSE 8501
