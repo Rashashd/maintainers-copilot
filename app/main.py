@@ -1,8 +1,10 @@
 import uuid
+from pathlib import Path
 
 import structlog
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import Response
 
 from app.core.exception_handlers import register as register_exception_handlers
 from app.core.lifespan import lifespan
@@ -49,5 +51,14 @@ app.include_router(admin_route.router)
 
 
 @app.get("/health", tags=["ops"])
-async def health():
+async def health() -> dict:
     return {"status": "ok"}
+
+
+_WIDGET_JS = (Path(__file__).parent / "widget.js").read_text()
+
+
+@app.get("/widget.js", include_in_schema=False)
+async def widget_loader() -> Response:
+    """Loader script — paste <script src='.../widget.js' data-widget-id='...'> into any page."""
+    return Response(content=_WIDGET_JS, media_type="application/javascript")

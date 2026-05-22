@@ -1,7 +1,25 @@
 import uuid
 from datetime import datetime
 
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
+
+
+class WidgetChatRequest(BaseModel):
+    message: str = Field(min_length=1, max_length=4000)
+    session_id: str | None = None
+
+
+class WidgetChatResponse(BaseModel):
+    reply: str
+    session_id: str
+
+
+class WidgetCreate(BaseModel):
+    name: str
+    allowed_origins: list[str] = []
+    theme: dict = {}
+    greeting: str = "How can I help you?"
+    enabled_tools: list[str] = []
 
 
 class WidgetUpdate(BaseModel):

@@ -104,6 +104,14 @@ class InferenceClient:
         except httpx.RequestError as exc:
             raise ToolFailure("summarize", f"Connection error: {exc}") from exc
 
+    async def health(self) -> dict:
+        try:
+            resp = await self._http.get("/health")
+            resp.raise_for_status()
+            return resp.json()
+        except Exception as exc:
+            return {"status": "unreachable", "error": str(exc)}
+
     async def aclose(self) -> None:
         await self._http.aclose()
 

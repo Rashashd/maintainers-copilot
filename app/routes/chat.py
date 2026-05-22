@@ -15,10 +15,10 @@ async def chat(
     user: User = Depends(current_active_user),
     session: AsyncSession = Depends(get_session),
 ) -> ChatResponse:
-    reply, conversation_id = await chat_service.handle(
+    reply, conversation_id, tools_used = await chat_service.handle(
         message=req.message,
         conversation_id=req.conversation_id,
         user_id=user.id,
         session=session,
     )
-    return ChatResponse(reply=reply, conversation_id=conversation_id)
+    return ChatResponse(reply=reply, conversation_id=conversation_id, tools_used=tools_used)

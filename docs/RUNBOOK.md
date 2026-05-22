@@ -114,6 +114,27 @@ To skip the RAGAS LLM-as-judge step (faster, no API cost):
 python -m eval.rag.runner --api-url http://localhost:8000 --no-ragas
 ```
 
+## HuggingFace model cache
+
+The BGE embedding model and reranker are downloaded once and stored in Docker
+volumes (`huggingface_cache`, `torch_cache`). Subsequent restarts load from
+the local cache — no network traffic.
+
+`docker-compose.yml` sets `TRANSFORMERS_OFFLINE=1` and `HF_HUB_OFFLINE=1` on
+the `api` and `model-server` services to skip hub checks entirely, which keeps
+startup fast on slow connections.
+
+**On a fresh machine** (empty volumes), comment out those two lines in
+`docker-compose.yml` for the first `docker compose up` so the model can
+download. Re-enable them once the containers have started successfully at
+least once.
+
+```yaml
+# Remove the '#' below only for first-time setup on a new machine:
+# TRANSFORMERS_OFFLINE: "1"
+# HF_HUB_OFFLINE: "1"
+```
+
 ## Rebuild after code changes
 
 ```bash

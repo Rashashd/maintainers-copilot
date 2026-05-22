@@ -271,6 +271,97 @@ class LLMClient:
             output_tokens=output_tokens,
         )
 
+    # ── Streaming ─────────────────────────────────────────────────────────────
+
+    async def chat_stream(
+        self,
+        messages: list[dict[str, Any]],
+        tools: list[dict] | None = None,
+        max_tokens: int = 1024,
+    ):
+        """Streaming chat. Yields dicts: {type: token|tool_calls|done, ...}.
+
+        OpenAI streams tokens in real time. Anthropic fallback runs non-streaming
+        and emits the full content as a single token event.
+        """
+        if self._openai:
+            try:
+                async for ev in self._openai_chat_stream(messages, tools, max_tokens):
+                    yield ev
+                return
+            except (openai.APIStatusError, openai.APIConnectionError) as exc:
+                logger.warning("openai_stream_failed_falling_back", error=str(exc))
+
+        if self._anthropic:
+            resp = await self._anthropic_chat(messages, tools, max_tokens)
+            if resp.has_tool_calls:
+                yield {"type": "tool_calls", "calls": resp.tool_calls}
+            elif resp.content:
+                yield {"type": "token", "text": resp.content}
+            yield {"type": "done", "input_tokens": resp.input_tokens, "output_tokens": resp.output_tokens}
+            return
+
+        raise RuntimeError("All LLM providers failed.")
+
+    async def _openai_chat_stream(
+        self,
+        messages: list[dict],
+        tools: list[dict] | None,
+        max_tokens: int,
+    ):
+        kwargs: dict[str, Any] = {
+            "model": OPENAI_MODEL,
+            "messages": messages,
+            "max_tokens": max_tokens,
+            "stream": True,
+            "stream_options": {"include_usage": True},
+        }
+        if tools:
+            kwargs["tools"] = tools
+            kwargs["tool_choice"] = "auto"
+
+        # index → {id, name, arguments} assembled from streaming deltas
+        tcs: dict[int, dict] = {}
+        input_tok = output_tok = 0
+
+        stream = await self._openai.chat.completions.create(**kwargs)  # type: ignore[union-attr]
+        async for chunk in stream:
+            if not chunk.choices:
+                if chunk.usage:
+                    input_tok = chunk.usage.prompt_tokens
+                    output_tok = chunk.usage.completion_tokens
+                continue
+            delta = chunk.choices[0].delta
+
+            if delta.tool_calls:
+                for tc in delta.tool_calls:
+                    if tc.index not in tcs:
+                        tcs[tc.index] = {"id": "", "name": "", "arguments": ""}
+                    e = tcs[tc.index]
+                    if tc.id:
+                        e["id"] += tc.id
+                    if tc.function:
+                        if tc.function.name:
+                            e["name"] += tc.function.name
+                        if tc.function.arguments:
+                            e["arguments"] += tc.function.arguments
+
+            if delta.content:
+                yield {"type": "token", "text": delta.content}
+
+        if tcs:
+            yield {
+                "type": "tool_calls",
+                "calls": [
+                    ToolCall(id=v["id"], name=v["name"], arguments=v["arguments"])
+                    for v in (tcs[i] for i in sorted(tcs))
+                ],
+            }
+
+        logger.info("llm_stream_done", provider="openai", model=OPENAI_MODEL,
+                    input_tokens=input_tok, output_tokens=output_tok)
+        yield {"type": "done", "input_tokens": input_tok, "output_tokens": output_tok}
+
 
 # ── Module-level singleton ────────────────────────────────────────────────────
 

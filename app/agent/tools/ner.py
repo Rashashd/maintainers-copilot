@@ -1,8 +1,10 @@
 import json
 
 from app.infra.inference import get_inference_client
+from app.infra.tracing import observe
 
 
+@observe(name="agent.tool.extract_entities")
 async def run(args: dict) -> str:
     client = get_inference_client()
     result = await client.ner(text=args["text"])

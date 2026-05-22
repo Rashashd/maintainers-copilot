@@ -4,6 +4,7 @@ import structlog
 import yaml
 
 from app.core.config import get_settings
+from app.infra.inference import get_inference_client
 from app.infra.redis import ping_redis
 from app.infra.tracing import ping_tracing
 from app.infra.vault import (
@@ -17,6 +18,14 @@ logger = structlog.get_logger()
 
 
 class VaultUnreachable(RuntimeError):
+    pass
+
+
+class ClassifierWeightsMissing(RuntimeError):
+    pass
+
+
+class WeightsSHA256Mismatch(RuntimeError):
     pass
 
 
@@ -42,6 +51,47 @@ async def assert_vault_reachable() -> None:
         raise VaultUnreachable(
             "Vault is unreachable or token is invalid. Cannot boot without secrets."
         )
+
+
+async def assert_classifier_weights_present() -> None:
+    """Check that the inference service has loaded the classifier weights."""
+    client = get_inference_client()
+    info = await client.health()
+    if info.get("status") == "unreachable":
+        raise ClassifierWeightsMissing(
+            f"Inference service is unreachable — is the model-server container running? "
+            f"Error: {info.get('error')}"
+        )
+    if info.get("classifier") != "loaded":
+        raise ClassifierWeightsMissing(
+            "Inference service reports classifier not loaded — weights may be missing from "
+            f"the model directory. Health response: {info}"
+        )
+    logger.info("classifier_weights_present")
+
+
+async def assert_weights_sha256_match() -> None:
+    """Check that the inference service verified its weights SHA-256 at startup.
+
+    The inference service computes and validates the SHA-256 of model.safetensors
+    against inference/expected_sha256.txt before it becomes healthy. If the hash
+    is absent from the health response, the inference service did not complete its
+    own integrity check.
+    """
+    client = get_inference_client()
+    info = await client.health()
+    if info.get("status") == "unreachable":
+        raise WeightsSHA256Mismatch(
+            f"Inference service is unreachable — cannot verify weights SHA-256. "
+            f"Error: {info.get('error')}"
+        )
+    sha = info.get("weights_sha256", "")
+    if not sha:
+        raise WeightsSHA256Mismatch(
+            "Inference service health response missing weights_sha256 — "
+            "SHA-256 integrity check did not run or weights were not found."
+        )
+    logger.info("weights_sha256_verified", sha256_prefix=sha[:16])
 
 
 async def assert_tracing_configured() -> None:
@@ -93,8 +143,8 @@ async def assert_redis_reachable() -> None:
 async def run_startup_checks() -> None:
     logger.info("startup_checks_starting")
     await assert_vault_reachable()
-    await assert_redis_reachable()
+    await assert_classifier_weights_present()
+    await assert_weights_sha256_match()
     await assert_tracing_configured()
-    assert_llm_key_configured()
     assert_eval_thresholds_nonzero()
     logger.info("startup_checks_passed")

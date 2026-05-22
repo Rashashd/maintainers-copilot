@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Home Assistant — Maintainers Copilot Demo</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: system-ui, -apple-system, sans-serif;
+      background: #f8fafc;
+      color: #1e293b;
+    }
+
+    /* Top nav */
+    nav {
+      background: #18355e;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      gap: 24px;
+      padding: 0 32px;
+      height: 56px;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+    nav .logo {
+      font-size: 18px;
+      font-weight: 700;
+      letter-spacing: -0.5px;
+      color: #fff;
+      text-decoration: none;
+    }
+    nav .logo span { color: #38bdf8; }
+    nav a {
+      color: #cbd5e1;
+      text-decoration: none;
+      font-size: 14px;
+    }
+    nav a:hover { color: #fff; }
+    nav .badge {
+      margin-left: auto;
+      background: #16a34a;
+      color: #fff;
+      padding: 3px 10px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 600;
+    }
+
+    /* Layout */
+    .container {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 48px 24px;
+    }
+
+    /* Hero */
+    .hero {
+      margin-bottom: 48px;
+    }
+    .hero h1 {
+      font-size: 2.25rem;
+      font-weight: 800;
+      margin: 0 0 12px;
+      line-height: 1.2;
+    }
+    .hero p {
+      font-size: 1.1rem;
+      color: #64748b;
+      max-width: 640px;
+      line-height: 1.7;
+    }
+
+    /* Cards */
+    .cards {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+      gap: 20px;
+      margin-bottom: 48px;
+    }
+    .card {
+      background: #fff;
+      border: 1px solid #e2e8f0;
+      border-radius: 12px;
+      padding: 24px;
+    }
+    .card-icon { font-size: 28px; margin-bottom: 12px; }
+    .card h3 { font-size: 16px; font-weight: 700; margin: 0 0 8px; }
+    .card p { font-size: 14px; color: #64748b; line-height: 1.6; margin: 0; }
+
+    /* Docs section */
+    .docs-section { margin-bottom: 40px; }
+    .docs-section h2 {
+      font-size: 1.4rem;
+      font-weight: 700;
+      margin: 0 0 16px;
+      padding-bottom: 8px;
+      border-bottom: 2px solid #e2e8f0;
+    }
+    .docs-section p {
+      color: #475569;
+      line-height: 1.75;
+      margin: 0 0 14px;
+    }
+    code {
+      background: #f1f5f9;
+      border: 1px solid #e2e8f0;
+      padding: 2px 7px;
+      border-radius: 4px;
+      font-size: 0.88em;
+      font-family: ui-monospace, monospace;
+    }
+    .callout {
+      background: #eff6ff;
+      border-left: 4px solid #3b82f6;
+      border-radius: 4px;
+      padding: 14px 18px;
+      margin: 20px 0;
+      font-size: 14px;
+      color: #1e40af;
+      line-height: 1.6;
+    }
+
+    /* Warning banner when no widget_id */
+    .no-widget-warn {
+      background: #fef9c3;
+      border: 1px solid #fde047;
+      border-radius: 8px;
+      padding: 14px 18px;
+      margin-bottom: 28px;
+      font-size: 14px;
+      color: #713f12;
+      display: none;
+    }
+  </style>
+</head>
+<body>
+
+<nav>
+  <a class="logo" href="#"><span>Home</span> Assistant</a>
+  <a href="#">Docs</a>
+  <a href="#">Integrations</a>
+  <a href="#">Community</a>
+  <a href="#">Blog</a>
+  <span class="badge">&#10003; Copilot Demo</span>
+</nav>
+
+<div class="container">
+  <div class="no-widget-warn" id="noWidgetWarn">
+    &#9888; No <code>widget_id</code> in the URL.
+    Append <code>?widget_id=YOUR_ID</code> to load the chat widget.
+  </div>
+
+  <div class="hero">
+    <h1>Home Assistant Documentation</h1>
+    <p>
+      Open-source home automation that puts local control and privacy first.
+      Power your home with a system that understands your needs, runs locally,
+      and is built by a community of 4,000+ contributors.
+    </p>
+  </div>
+
+  <div class="cards">
+    <div class="card">
+      <div class="card-icon">&#128268;</div>
+      <h3>Integrations</h3>
+      <p>Connect over 3,000 smart home devices and services — lights, locks, sensors, media players, and more.</p>
+    </div>
+    <div class="card">
+      <div class="card-icon">&#9889;</div>
+      <h3>Automations</h3>
+      <p>Trigger actions on events, states, or schedules using the visual editor or YAML.</p>
+    </div>
+    <div class="card">
+      <div class="card-icon">&#128250;</div>
+      <h3>Dashboards</h3>
+      <p>Build fully customizable dashboards with Lovelace — cards, maps, history charts, and more.</p>
+    </div>
+    <div class="card">
+      <div class="card-icon">&#128274;</div>
+      <h3>Local &amp; Private</h3>
+      <p>No cloud required. Your data stays in your home and works even without an internet connection.</p>
+    </div>
+  </div>
+
+  <div class="docs-section">
+    <h2>Getting Started</h2>
+    <p>
+      Home Assistant can be installed on a Raspberry Pi, an old laptop, a NAS, or a dedicated
+      appliance. The recommended installation method is <strong>Home Assistant OS</strong>
+      which provides a managed environment with automatic updates.
+    </p>
+    <div class="callout">
+      <strong>Tip:</strong> Use the chat widget in the bottom-right corner to ask questions
+      about integrations, automations, or troubleshoot issues. It's powered by an AI assistant
+      trained on resolved GitHub issues.
+    </div>
+    <p>
+      Once installed, navigate to <code>http://homeassistant.local:8123</code> in your browser.
+      The onboarding wizard walks you through creating your first user account and discovering
+      devices already on your network.
+    </p>
+  </div>
+
+  <div class="docs-section">
+    <h2>Configuration</h2>
+    <p>
+      Most configuration can be done via the UI, but advanced users can edit
+      <code>configuration.yaml</code> directly. The configuration file lives in the
+      <code>/config</code> directory and supports splitting into multiple files using
+      <code>!include</code> directives.
+    </p>
+    <p>
+      Validate your configuration before restarting with the <strong>Developer Tools</strong>
+      &rarr; <strong>Check configuration</strong> button, or run
+      <code>ha core check</code> from the CLI.
+    </p>
+  </div>
+
+  <div class="docs-section">
+    <h2>Common Issues</h2>
+    <p>
+      If a device stops responding, check the integration logs under
+      <strong>Settings &rarr; System &rarr; Logs</strong>. For Z-Wave or Zigbee devices,
+      verify the USB stick is recognized and the correct path is set in the integration config.
+    </p>
+    <p>
+      For database issues, consider adjusting the <code>recorder</code> purge settings or
+      migrating to an external database such as MariaDB or PostgreSQL for larger installations.
+    </p>
+  </div>
+</div>
+
+<script>
+  (function () {
+    var params  = new URLSearchParams(window.location.search);
+    var apiUrl  = params.get('api') || 'http://localhost:8000';
+
+    // Accept ?widget_ids=id1,id2,id3  OR  ?widget_id=id (single)
+    var raw = params.get('widget_ids') || params.get('widget_id') || '';
+    var ids = raw.split(',').map(function (s) { return s.trim(); }).filter(Boolean);
+
+    if (!ids.length) {
+      document.getElementById('noWidgetWarn').style.display = 'block';
+      return;
+    }
+
+    ids.forEach(function (widgetId) {
+      var s = document.createElement('script');
+      s.src = apiUrl + '/widget.js';
+      s.setAttribute('data-widget-id', widgetId);
+      s.setAttribute('data-widget-host', window.location.origin);
+      document.body.appendChild(s);
+    });
+  })();
+</script>
+</body>
+</html>

@@ -103,7 +103,7 @@ TOOL_DEFINITIONS: list[dict] = [
 async def dispatch(
     name: str,
     args: dict,
-    user_id: uuid.UUID,
+    user_id: uuid.UUID | None,
     conversation_id: str,
     session: AsyncSession,
 ) -> str:
@@ -122,7 +122,7 @@ async def dispatch(
         else:
             return f"Unknown tool: {name}"
 
-        if name in _INFERENCE_TOOLS:
+        if name in _INFERENCE_TOOLS and user_id is not None:
             try:
                 output = json.loads(result)
             except (ValueError, TypeError):

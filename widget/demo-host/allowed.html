@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Home Assistant Docs — Allowed Host</title>
+  <style>
+    body { font-family: system-ui, sans-serif; max-width: 860px; margin: 0 auto; padding: 40px 24px; color: #111; }
+    h1 { font-size: 2rem; margin-bottom: 8px; }
+    .badge { display: inline-block; background: #16a34a; color: #fff; padding: 2px 10px; border-radius: 4px; font-size: 12px; font-weight: 600; margin-bottom: 24px; }
+    p { line-height: 1.7; margin-bottom: 16px; color: #374151; }
+    code { background: #f3f4f6; padding: 2px 6px; border-radius: 4px; font-size: 0.9em; }
+  </style>
+</head>
+<body>
+  <h1>Home Assistant Documentation</h1>
+  <div class="badge">✓ ALLOWED ORIGIN — widget loads here</div>
+
+  <p>
+    This page is served from <code>http://localhost:8080</code>, which is listed in the
+    widget's <code>allowed_origins</code>. The chat bubble appears in the bottom-right corner.
+  </p>
+  <p>
+    Open your browser's DevTools → Network tab to see the
+    <code>Content-Security-Policy: frame-ancestors</code> header on the widget config response.
+  </p>
+
+  <h2>Integrations</h2>
+  <p>
+    Home Assistant integrations allow you to connect and control thousands of smart home
+    devices and services. Browse the integration catalogue to find what works with your setup.
+  </p>
+  <h2>Automations</h2>
+  <p>
+    Automations let you define rules that trigger actions based on events, states, or schedules.
+    Use the visual editor or YAML to build powerful home automation workflows.
+  </p>
+
+  <script>
+    // Read widget_id from ?widget_id=... query parameter so no hardcoding needed
+    const params = new URLSearchParams(window.location.search)
+    const widgetId = params.get('widget_id')
+    if (widgetId) {
+      const s = document.createElement('script')
+      s.src = 'http://localhost:8000/widget.js'
+      s.setAttribute('data-widget-id', widgetId)
+      s.setAttribute('data-widget-host', 'http://localhost:3000')
+      document.body.appendChild(s)
+    } else {
+      const warn = document.createElement('p')
+      warn.style.cssText = 'color:#dc2626;font-weight:600'
+      warn.textContent = '⚠ Add ?widget_id=YOUR_WIDGET_ID to the URL to load the widget.'
+      document.body.insertBefore(warn, document.body.firstChild)
+    }
+  </script>
+</body>
+</html>

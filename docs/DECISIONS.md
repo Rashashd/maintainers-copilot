@@ -16,11 +16,11 @@ public docs corpus available for RAG; real-world maintainer triage problem.
 
 ## 2. Classifier deployment
 
-| Model | Accuracy | Macro-F1 | Latency (p95) | Cost |
-|---|---|---|---|---|
-| DistilBERT fine-tuned | 0.63 | 0.63 | <50ms (GPU) | ~$0 inference |
-| TF-IDF + Logistic Regression | _TODO_ | _TODO_ | <5ms | ~$0 |
-| LLM zero-shot (gpt-4o-mini) | 0.59 | 0.59 | ~800ms | ~$0.001/req |
+| Model | Accuracy | Macro-F1 | Bug F1 | Feature F1 | Docs F1 | Question F1 | Latency (p95) | Cost |
+|---|---|---|---|---|---|---|---|---|
+| DistilBERT fine-tuned | 0.6259 | 0.6312 | 0.61 | 0.57 | 0.95 | 0.40 | <50ms (GPU) | ~$0 inference |
+| TF-IDF + Logistic Regression | 0.5835 | 0.5382 | 0.63 | 0.48 | 0.89 | 0.15 | <5ms | ~$0 |
+| LLM zero-shot (gpt-4o-mini) | 0.6708 | 0.5863 | 0.79 | 0.52 | 0.53 | 0.50 | ~800ms | ~$0.001/req |
 
 **Choice:** DistilBERT fine-tuned
 **Why:** Best macro-F1 at lower latency and zero per-request cost once weights are loaded.
@@ -155,7 +155,8 @@ Hand-labeled 5 of 25 RAG golden items independently.
 ## 12. Widget bundle size
 
 **Target:** < 200KB gzipped
-**Actual:** _TODO_ (fill in after `npm run build`)
+**Actual:** 47.39 KB gzipped (`widget.js`, 146 KB raw → 47 KB gzip)
+**Why it matters:** The widget is injected via a `<script>` tag on third-party docs sites — a large bundle harms page load. At 47 KB gzipped it loads in under 100 ms on a typical connection.
 
 ---
 

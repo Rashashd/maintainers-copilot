@@ -8,12 +8,14 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.db.models import MemoryEntry
 from app.infra import embeddings as embedder
 from app.infra.redact import redact
+from app.infra.tracing import observe
 from app.repositories import audit as audit_repo
 from app.repositories import memory as memory_repo
 
 logger = structlog.get_logger()
 
 
+@observe(name="agent.tool.write_memory")
 async def run(args: dict, user_id: uuid.UUID, conversation_id: str, session: AsyncSession) -> str:
     content = redact(args["content"])
 
