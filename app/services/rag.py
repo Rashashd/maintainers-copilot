@@ -24,6 +24,8 @@ async def answer(
     query: str,
     session: AsyncSession,
     alpha: float = 0.6,
+    use_reranker: bool = True,
+    use_hyde: bool = True,
 ) -> tuple[str, list[str]]:
     """
     Full RAG pipeline:
@@ -33,15 +35,16 @@ async def answer(
       4. Cross-encoder reranking
       5. LLM answer generation
     """
-    # Override trace input: expose only the query, not the SQLAlchemy session or alpha
-    get_client().update_current_span(input={"query": query, "alpha": alpha})
+    get_client().update_current_span(
+        input={"query": query, "alpha": alpha, "use_reranker": use_reranker, "use_hyde": use_hyde}
+    )
 
     # 1. extract metadata filters from the query
     filters = await query_rewriter.extract_filters(query)
     logger.info("rag_filters_extracted", filters=filters)
 
     # 2. HyDE: generate hypothetical answer and embed it as a document
-    hypothesis = await query_rewriter.rewrite_hyde(query)
+    hypothesis = await query_rewriter.rewrite_hyde(query) if use_hyde else query
     query_vector = (await embedder.embed_texts([hypothesis]))[0]
 
     # 3. hybrid retrieval
@@ -58,10 +61,13 @@ async def answer(
         return "I could not find any relevant issues for your question.", []
 
     # 4. cross-encoder reranking
-    passages = [doc.content for doc in docs]
-    scores = await rerank(query, passages)
-    ranked = sorted(zip(docs, scores), key=lambda x: x[1], reverse=True)
-    top_docs = [doc for doc, _ in ranked[:_RERANK_K]]
+    if use_reranker:
+        passages = [doc.content for doc in docs]
+        scores = await rerank(query, passages)
+        ranked = sorted(zip(docs, scores), key=lambda x: x[1], reverse=True)
+        top_docs = [doc for doc, _ in ranked[:_RERANK_K]]
+    else:
+        top_docs = docs[:_RERANK_K]
 
     # 5. build context and generate answer
     context = _build_context(top_docs)

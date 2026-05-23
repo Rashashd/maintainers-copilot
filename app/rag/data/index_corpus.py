@@ -14,7 +14,8 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
 
 from app.core.config import get_settings
-from app.db.session import async_session_factory, init_db
+from app.db import session as _db_session
+from app.db.session import init_db
 from app.infra import vault
 from app.infra.embeddings import init_embedder
 from app.rag.indexer import index_corpus
@@ -37,8 +38,8 @@ async def main(parquet_path: Path) -> None:
     print("Loading embedding model...")
     init_embedder()
 
-    assert async_session_factory is not None
-    async with async_session_factory() as session:
+    assert _db_session.async_session_factory is not None
+    async with _db_session.async_session_factory() as session:
         print(f"Indexing corpus from: {parquet_path}")
         n = await index_corpus(str(parquet_path), session)
         print(f"Done — {n:,} chunks written to documents table.")

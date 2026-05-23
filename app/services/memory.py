@@ -1,6 +1,6 @@
-"""Memory service — Redis short-term (24h TTL).
+"""Memory service — Redis short-term (2h TTL).
 
-Short-term: full conversation history in Redis, expires after 24h.
+Short-term: full conversation history in Redis, expires after 2h.
 Long-term: written only via the write_memory agent tool (explicit, audited).
 """
 
@@ -27,5 +27,5 @@ async def load_history(user_id: uuid.UUID, conversation_id: str) -> list[dict]:
 async def save_history(
     user_id: uuid.UUID, conversation_id: str, messages: list[dict]
 ) -> None:
-    """Overwrite history in Redis, refreshing the 24h TTL."""
+    """Overwrite history in Redis, refreshing the 2h TTL."""
     await redis.set_json(_key(user_id, conversation_id), messages, ttl=_TTL)

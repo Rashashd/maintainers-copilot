@@ -15,5 +15,8 @@ async def ask(
 ) -> AskResponse:
     if not req.query.strip():
         raise HTTPException(status_code=422, detail="query must not be empty")
-    answer, contexts = await rag_service.answer(req.query, session, alpha=req.alpha)
+    answer, contexts = await rag_service.answer(
+        req.query, session, alpha=req.alpha,
+        use_reranker=req.use_reranker, use_hyde=req.use_hyde,
+    )
     return AskResponse(query=req.query, answer=answer, contexts=contexts)
