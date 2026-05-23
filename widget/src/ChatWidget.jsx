@@ -38,11 +38,20 @@ export default function ChatWidget({ widgetId, apiUrl, slot = 0 }) {
   const [statusText, setStatusText] = useState('')
   const bottomRef = useRef(null)
 
-  const sessionId = useRef(
-    sessionStorage.getItem('cw_session') || crypto.randomUUID()
-  )
+  const SESSION_TTL_MS = 30 * 60 * 1000  // must match _WIDGET_TTL on the server (1800s)
+
+  const sessionId = useRef((() => {
+    const stored = sessionStorage.getItem('cw_session')
+    const ts = parseInt(sessionStorage.getItem('cw_session_ts') || '0', 10)
+    if (stored && Date.now() - ts < SESSION_TTL_MS) return stored
+    sessionStorage.removeItem('cw_session')
+    sessionStorage.removeItem('cw_session_ts')
+    return crypto.randomUUID()
+  })())
+
   useEffect(() => {
     sessionStorage.setItem('cw_session', sessionId.current)
+    sessionStorage.setItem('cw_session_ts', String(Date.now()))
   }, [])
 
   useEffect(() => {
@@ -117,6 +126,7 @@ export default function ChatWidget({ widgetId, apiUrl, slot = 0 }) {
               setStatusText(ev.text)
             } else if (ev.type === 'done') {
               if (ev.session_id) sessionId.current = ev.session_id
+              sessionStorage.setItem('cw_session_ts', String(Date.now()))
               setMessages(prev => {
                 const copy = [...prev]
                 const last = copy[copy.length - 1]
