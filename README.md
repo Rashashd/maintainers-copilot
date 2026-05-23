@@ -73,3 +73,15 @@ python -m app.rag.data.index_corpus
 | [docs/RUNBOOK.md](docs/RUNBOOK.md) | Full local setup, Vault seeding, corpus fetch, eval runs |
 | [docs/EVALS.md](docs/EVALS.md) | Evaluation methodology, golden sets, thresholds, how to run |
 | [docs/SECURITY.md](docs/SECURITY.md) | Secrets management, CSP enforcement, redaction layer, JWT auth |
+
+Project 7
+Tag: v0.1.0-week7
+Dataset: home-assistant/core + home-assistant.io issues, 1862 train / 399 val / 401 test
+Classification — Classical: F1=0.5382 | Fine-tuned: F1=0.6312 | LLM: F1=0.5863
+Deployment choice: DistilBERT fine-tuned - best macro-F1 at zero per-request inference cost
+Embedding model: BAAI/bge-base-en-v1.5 - asymmetric search query prefix + strong MTEB retrieval scores, Hit@5=0.88 on HA golden set
+RAG — hit@5=0.88 | MRR=0.88 | Faithfulness=0.7519 | Answer relevancy=0.6148
+Long-term memory type: episodic
+Tracing backend: Langfuse - self-hostable, LLM-native, free tier with strong Python SDK
+Widget bundle size: 47 KB (gzipped)
+LLM: OpenAI gpt-4o-mini (primary) / Claude Haiku (fallback)
