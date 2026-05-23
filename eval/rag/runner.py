@@ -8,6 +8,7 @@ Usage:
     python -m eval.rag.runner                  # default alpha=0.5, with RAGAS
     python -m eval.rag.runner --alpha-sweep    # sweep alpha 0.1-0.9
     python -m eval.rag.runner --no-ragas       # skip RAGAS (faster)
+    python -m eval.rag.runner --ablation       # extra passes: no-reranker, no-HyDE
     python -m eval.rag.runner --api-url http://localhost:8000
 """
 
@@ -80,7 +81,7 @@ def check_thresholds(metrics: dict, thresholds: dict) -> list[str]:
     return violations
 
 
-async def main(api_url: str, run_sweep: bool, run_ragas: bool) -> int:
+async def main(api_url: str, run_sweep: bool, run_ragas: bool, run_ablation: bool) -> int:
     items = load_golden_set(GOLDEN_SET_PATH)
     print(f"Loaded {len(items)} golden items from {GOLDEN_SET_PATH}")
 
@@ -97,6 +98,23 @@ async def main(api_url: str, run_sweep: bool, run_ragas: bool) -> int:
     report["best_alpha"] = best["alpha"]
     hit = best[f"hit_at_{_K}"]
     print(f"\nBest alpha: {best['alpha']}  hit@{_K}={hit:.4f}  MRR={best['mrr']:.4f}")
+
+    # ── Ablation passes (no-reranker, no-HyDE) ───────────────────────────────
+    if run_ablation:
+        best_alpha = best["alpha"]
+        ablations = []
+        for label, flags in [
+            ("no_reranker", {"use_reranker": False, "use_hyde": True}),
+            ("no_hyde",     {"use_reranker": True,  "use_hyde": False}),
+        ]:
+            print(f"\nAblation: {label} (alpha={best_alpha}) ...")
+            rows = await retrieval_eval.run(items, api_url, [best_alpha], **flags)
+            r = rows[0]
+            ablations.append({"label": label, **flags, **r})
+            print(f"  hit@{_K}={r[f'hit_at_{_K}']:.4f}  MRR={r['mrr']:.4f}")
+        report["ablations"] = ablations
+    else:
+        report["ablations"] = []
 
     # ── Generation eval (RAGAS) ───────────────────────────────────────────────
     if run_ragas:
@@ -143,5 +161,6 @@ if __name__ == "__main__":
     parser.add_argument("--api-url", default="http://localhost:8000")
     parser.add_argument("--alpha-sweep", action="store_true")
     parser.add_argument("--no-ragas", action="store_true")
+    parser.add_argument("--ablation", action="store_true")
     args = parser.parse_args()
-    sys.exit(asyncio.run(main(args.api_url, args.alpha_sweep, not args.no_ragas)))
+    sys.exit(asyncio.run(main(args.api_url, args.alpha_sweep, not args.no_ragas, args.ablation)))

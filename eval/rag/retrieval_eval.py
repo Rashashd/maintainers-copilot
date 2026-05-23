@@ -12,8 +12,17 @@ from eval.rag.metrics import aggregate, hit_at_k, ndcg_at_k, reciprocal_rank
 _K = 5
 
 
-async def _ask(client: httpx.AsyncClient, query: str, alpha: float) -> str:
-    resp = await client.post("/rag/ask", json={"query": query, "alpha": alpha})
+async def _ask(
+    client: httpx.AsyncClient,
+    query: str,
+    alpha: float,
+    use_reranker: bool = True,
+    use_hyde: bool = True,
+) -> str:
+    resp = await client.post(
+        "/rag/ask",
+        json={"query": query, "alpha": alpha, "use_reranker": use_reranker, "use_hyde": use_hyde},
+    )
     resp.raise_for_status()
     return resp.json().get("answer", "")
 
@@ -22,6 +31,8 @@ async def run(
     items: list[dict],
     api_url: str,
     alphas: list[float],
+    use_reranker: bool = True,
+    use_hyde: bool = True,
 ) -> list[dict]:
     """Run retrieval eval for each alpha. Returns one result dict per alpha.
 
@@ -36,7 +47,7 @@ async def run(
         async with httpx.AsyncClient(base_url=api_url, timeout=60.0) as client:
             for item in items:
                 try:
-                    answer = await _ask(client, item["question"], alpha)
+                    answer = await _ask(client, item["question"], alpha, use_reranker, use_hyde)
                     keywords = [w for w in item["ideal_answer"].lower().split() if len(w) > 5][:10]
                     hit = any(kw in answer.lower() for kw in keywords)
                     source_ids = item.get("ground_truth_source_ids") or []

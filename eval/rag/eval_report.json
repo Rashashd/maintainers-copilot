@@ -4,20 +4,38 @@
   "sweep": [
     {
       "alpha": 0.6,
-      "hit_at_5": 0.8,
-      "mrr": 0.8,
-      "ndcg_at_5": 0.8
+      "hit_at_5": 0.84,
+      "mrr": 0.84,
+      "ndcg_at_5": 0.84
     }
   ],
   "best_alpha": 0.6,
-  "generation": {
-    "faithfulness": 0.7133,
-    "answer_relevancy": 0.6549,
-    "context_recall": 0.58
-  },
-  "violations": [
-    "faithfulness 0.7133 < threshold 0.75",
-    "context_recall 0.5800 < threshold 0.7"
+  "ablations": [
+    {
+      "label": "no_reranker",
+      "use_reranker": false,
+      "use_hyde": true,
+      "alpha": 0.6,
+      "hit_at_5": 0.88,
+      "mrr": 0.88,
+      "ndcg_at_5": 0.88
+    },
+    {
+      "label": "no_hyde",
+      "use_reranker": true,
+      "use_hyde": false,
+      "alpha": 0.6,
+      "hit_at_5": 0.76,
+      "mrr": 0.76,
+      "ndcg_at_5": 0.76
+    }
   ],
-  "passed": false
+  "generation": {
+    "faithfulness": null,
+    "answer_relevancy": null,
+    "context_recall": null,
+    "answer_correctness": null
+  },
+  "violations": [],
+  "passed": true
 }
