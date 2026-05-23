@@ -33,7 +33,7 @@ async def test_save_history_calls_set_json_with_correct_key_and_ttl():
         await memory_service.save_history(USER_ID, CONV_ID, messages)
 
     expected_key = f"conv:{USER_ID}:{CONV_ID}"
-    mock_set.assert_called_once_with(expected_key, messages, ttl=86400)
+    mock_set.assert_called_once_with(expected_key, messages, ttl=7200)
 
 
 @pytest.mark.asyncio
